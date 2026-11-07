@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-J41Z0NHW20"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-J41Z0NHW20', { 'app_name': 'rare-drop-biyori' });
+  </script>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#9b59b6">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>レアドロップ日和</title>
+  <meta name="description" content="毎日が予測どおりに埋まっていくマンネリに。知らない店・普段頼まないメニュー・触ったことのない技術など、ルーティンから一歩だけ外れるお題を1日1回レアドロップのように引いて、やってみたら図鑑が埋まり経験値が育つアプリ。半年に1回の「レアイベント」も予定に入れられます。">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+  <meta property="og:title" content="レアドロップ日和">
+  <meta property="og:description" content="ルーティンから一歩だけ外れるお題を、1日1回レアドロップのように。何が出るかわからない毎日を。">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://rare-drop-biyori.vercel.app/ogp.png">
+  <meta property="og:image:type" content="image/png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://rare-drop-biyori.vercel.app/ogp.png">
+</head>
+<body>
+
+  <!-- ログイン画面 -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+      <span class="login-card__logo"><svg width="64" height="64" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 14 H44 L54 26 L32 52 L10 26 Z"/><path d="M10 26 H54"/><path d="M26 14 L22 26 L32 52 L42 26 L38 14"/></svg></span>
+      <h1 class="login-card__title">レアドロップ日和</h1>
+      <p class="login-card__tagline">ルーティンから、一歩だけ外れよう。<br>きょうは何が出るかな。</p>
+      <button id="btn-google-login" class="google-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Googleでログイン
+      </button>
+    </div>
+  </div>
+
+  <div id="app" class="hidden">
+    <header class="app-header">
+      <span class="app-header__brand"><svg width="28" height="28" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-7px"><path d="M20 14 H44 L54 26 L32 52 L10 26 Z"/><path d="M10 26 H54"/><path d="M26 14 L22 26 L32 52 L42 26 L38 14"/></svg> レアドロップ日和</span>
+      <nav class="app-header__nav">
+        <a href="about.html" class="app-header__about-link">アプリについて</a>
+        <div id="user-info" class="app-header__user hidden">
+          <img id="user-avatar" class="app-header__avatar" src="" alt="" />
+          <span id="user-name" class="app-header__name"></span>
+          <button id="btn-logout" class="btn btn--ghost btn--sm">ログアウト</button>
+        </div>
+      </nav>
+    </header>
+
+    <div class="tabs-bar">
+      <div class="tabs" role="tablist">
+        <button type="button" class="tabs__btn is-active" role="tab" data-tab="today" aria-selected="true">きょう</button>
+        <button type="button" class="tabs__btn" role="tab" data-tab="zukan" aria-selected="false">図鑑</button>
+        <button type="button" class="tabs__btn" role="tab" data-tab="events" aria-selected="false">レアイベント</button>
+        <button type="button" class="tabs__btn" role="tab" data-tab="record" aria-selected="false">記録</button>
+      </div>
+    </div>
+
+    <main class="app-main">
+
+      <!-- きょう -->
+      <section class="panel" data-panel="today">
+        <div class="today-head">
+          <p class="today-head__date" id="today-date"></p>
+          <h2 class="today-head__title">きょうのドロップ</h2>
+        </div>
+        <div class="stat-row">
+          <div class="stat-card"><div class="stat-card__value" id="today-level">Lv.1</div><div class="stat-card__label" id="today-title">いつもの村人</div></div>
+          <div class="stat-card"><div class="stat-card__value" id="today-found">0</div><div class="stat-card__label">図鑑の発見</div></div>
+          <div class="stat-card"><div class="stat-card__value" id="today-streak">0週</div><div class="stat-card__label">連続で寄り道</div></div>
+        </div>
+
+        <div id="drop-area" class="drop" aria-live="polite"></div>
+
+        <div class="section">
+          <div class="section__head">
+            <h3 class="section__title">次のレアイベント</h3>
+            <p class="section__desc">半年に1回レベルの非日常。美術館・ライブ・イベントなど</p>
+          </div>
+          <div id="today-event"></div>
+        </div>
+
+        <div class="section">
+          <div class="section__head">
+            <h3 class="section__title">最近のドロップ</h3>
+          </div>
+          <div id="today-recent" class="log-list"></div>
+        </div>
+      </section>
+
+      <!-- 図鑑 -->
+      <section class="panel hidden" data-panel="zukan">
+        <div class="section__head section__head--row">
+          <div>
+            <h2 class="section__title">ドロップ図鑑</h2>
+            <p class="section__desc">やってみたお題が埋まっていきます。お題は自分でも追加できます。</p>
+          </div>
+          <button type="button" id="btn-add-quest" class="btn btn--primary btn--sm">お題を追加</button>
+        </div>
+        <div id="zukan-progress" class="zukan-progress"></div>
+        <div id="zukan-chips" class="filter-chips" role="radiogroup" aria-label="カテゴリで絞り込む"></div>
+        <label class="toggle">
+          <input type="checkbox" id="toggle-reveal" />
+          <span>まだ出ていないお題も見る</span>
+        </label>
+        <div id="zukan-list" class="zukan-list"></div>
+        <details class="fold" id="hidden-fold">
+          <summary class="fold__summary">出さないことにしたお題<span class="fold__count" id="hidden-count"></span></summary>
+          <div id="hidden-list" class="zukan-list zukan-list--hidden"></div>
+        </details>
+      </section>
+
+      <!-- レアイベント -->
+      <section class="panel hidden" data-panel="events">
+        <div class="section__head section__head--row">
+          <div>
+            <h2 class="section__title">レアイベント</h2>
+            <p class="section__desc">ルーティンの外にある、半年に1回レベルの予定。先に枠として入れておくと、ちゃんとやってきます。</p>
+          </div>
+          <button type="button" id="btn-add-event" class="btn btn--primary btn--sm">予定を入れる</button>
+        </div>
+        <div id="event-nudge"></div>
+        <div id="event-list" class="event-list"></div>
+        <details class="fold" id="event-done-fold">
+          <summary class="fold__summary">行ってきたレアイベント<span class="fold__count" id="event-done-count"></span></summary>
+          <div id="event-done-list" class="event-list"></div>
+        </details>
+      </section>
+
+      <!-- 記録 -->
+      <section class="panel hidden" data-panel="record">
+        <div class="level-card card-surface">
+          <div class="level-card__head">
+            <span class="level-card__level" id="rec-level">Lv.1</span>
+            <span class="level-card__title" id="rec-title">いつもの村人</span>
+          </div>
+          <div class="level-card__bar"><span class="level-card__fill" id="rec-fill"></span></div>
+          <p class="level-card__next" id="rec-next"></p>
+          <p class="xp-rule">コモン10・レア20・エピック40XP／ドロップに従うと+5・ひとことで+5／レアイベント+50</p>
+        </div>
+
+        <div class="stat-row">
+          <div class="stat-card"><div class="stat-card__value" id="rec-tries">0</div><div class="stat-card__label">やってみた</div></div>
+          <div class="stat-card"><div class="stat-card__value" id="rec-hit">-</div><div class="stat-card__label">当たり率</div></div>
+          <div class="stat-card"><div class="stat-card__value" id="rec-events">0</div><div class="stat-card__label">レアイベント</div></div>
+        </div>
+
+        <div class="section">
+          <div class="section__head"><h3 class="section__title">カテゴリ別</h3></div>
+          <div id="rec-cats" class="cat-bars card-surface"></div>
+        </div>
+
+        <div class="section">
+          <div class="section__head"><h3 class="section__title">やってみた記録</h3></div>
+          <div id="rec-list" class="log-list"></div>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="footer">
+      <p>© 2026 Yuji Nakamura. All rights reserved.</p>
+      <p><a href="https://apps.yuji-nakamura.com/" target="_blank" rel="noopener">他のアプリを見る →</a></p>
+    </footer>
+
+    <a href="about.html" class="about-btn"><svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="32" cy="32" r="20"/><circle cx="32" cy="22" r="1.5" fill="currentColor" stroke="none"/><line x1="32" y1="30" x2="32" y2="44"/></svg> アプリについて</a>
+    <button type="button" id="btn-fab" class="fab hidden" aria-label="追加する"><svg width="24" height="24" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" aria-hidden="true"><path d="M32 12 V52"/><path d="M12 32 H52"/></svg></button>
+    <button id="feedback-btn" class="feedback-btn" aria-label="ご意見・ご要望"><svg width="22" height="22" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="vertical-align:-6px"><rect x="8" y="14" width="48" height="30" rx="8"/><path d="M22 44 L14 54 V44"/></svg> ご意見</button>
+  </div>
+
+  <!-- やってみた記録 -->
+  <div id="log-modal-overlay" class="dialog-overlay">
+    <form id="log-form" class="modal" novalidate>
+      <div class="modal__head">
+        <div class="modal__title" id="log-modal-title">やってみた！</div>
+        <button type="button" id="btn-log-close" class="modal__close" aria-label="閉じる">&times;</button>
+      </div>
+      <div class="modal__quest" id="log-quest"></div>
+      <div class="field">
+        <label class="field__label" for="input-log-date">やった日</label>
+        <input type="date" id="input-log-date" required />
+      </div>
+      <div class="field">
+        <span class="field__label">どうだった？</span>
+        <div id="log-results" class="segmented" role="radiogroup"></div>
+      </div>
+      <div class="field">
+        <label class="field__label" for="input-log-note">ひとこと<span class="field__hint">任意・+5XP</span></label>
+        <textarea id="input-log-note" maxlength="500" placeholder="例：知らない定食屋の日替わりが大当たり。また行く"></textarea>
+      </div>
+      <div class="modal__actions">
+        <button type="button" id="btn-log-delete" class="btn btn--ghost is-danger hidden modal__actions-left">削除</button>
+        <button type="button" id="btn-log-cancel" class="btn btn--ghost">キャンセル</button>
+        <button type="submit" id="btn-log-submit" class="btn btn--primary">記録する</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- お題の追加・編集 -->
+  <div id="quest-modal-overlay" class="dialog-overlay">
+    <form id="quest-form" class="modal" novalidate>
+      <div class="modal__head">
+        <div class="modal__title" id="quest-modal-title">お題を追加</div>
+        <button type="button" id="btn-quest-close" class="modal__close" aria-label="閉じる">&times;</button>
+      </div>
+      <div class="field">
+        <label class="field__label" for="input-quest-title">お題</label>
+        <input type="text" id="input-quest-title" maxlength="60" placeholder="例：行ったことのない銭湯に入る" required />
+      </div>
+      <div class="field">
+        <span class="field__label">カテゴリ</span>
+        <div id="quest-cats" class="filter-chips filter-chips--tight" role="radiogroup"></div>
+      </div>
+      <div class="field">
+        <span class="field__label">レア度<span class="field__hint">エピックほど出にくく、XPが多い</span></span>
+        <div id="quest-rarities" class="segmented" role="radiogroup"></div>
+      </div>
+      <div class="modal__actions">
+        <button type="button" id="btn-quest-delete" class="btn btn--ghost is-danger hidden modal__actions-left">削除</button>
+        <button type="button" id="btn-quest-cancel" class="btn btn--ghost">キャンセル</button>
+        <button type="submit" id="btn-quest-submit" class="btn btn--primary">追加する</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- お題の詳細 -->
+  <div id="detail-modal-overlay" class="dialog-overlay">
+    <div class="modal">
+      <div class="modal__head">
+        <div class="modal__title">お題の記録</div>
+        <button type="button" id="btn-detail-close" class="modal__close" aria-label="閉じる">&times;</button>
+      </div>
+      <div class="modal__quest" id="detail-quest"></div>
+      <div id="detail-logs" class="log-list log-list--compact"></div>
+      <div class="modal__actions modal__actions--wrap" id="detail-actions"></div>
+    </div>
+  </div>
+
+  <!-- レアイベントの予定 -->
+  <div id="event-modal-overlay" class="dialog-overlay">
+    <form id="event-form" class="modal" novalidate>
+      <div class="modal__head">
+        <div class="modal__title" id="event-modal-title">レアイベントを予定に入れる</div>
+        <button type="button" id="btn-event-close" class="modal__close" aria-label="閉じる">&times;</button>
+      </div>
+      <div class="field">
+        <label class="field__label" for="input-event-title">なにをする？</label>
+        <input type="text" id="input-event-title" maxlength="60" placeholder="例：〇〇美術館の企画展" required />
+        <div id="event-examples" class="filter-chips filter-chips--tight filter-chips--examples"></div>
+      </div>
+      <div class="field">
+        <label class="field__label" for="input-event-date">いつ？<span class="field__hint">未定でもOK</span></label>
+        <input type="date" id="input-event-date" />
+      </div>
+      <div class="modal__actions">
+        <button type="button" id="btn-event-delete" class="btn btn--ghost is-danger hidden modal__actions-left">削除</button>
+        <button type="button" id="btn-event-cancel" class="btn btn--ghost">キャンセル</button>
+        <button type="submit" id="btn-event-submit" class="btn btn--primary">予定に入れる</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- レアイベントに行ってきた -->
+  <div id="done-modal-overlay" class="dialog-overlay">
+    <form id="done-form" class="modal" novalidate>
+      <div class="modal__head">
+        <div class="modal__title">行ってきた！</div>
+        <button type="button" id="btn-done-close" class="modal__close" aria-label="閉じる">&times;</button>
+      </div>
+      <div class="modal__quest" id="done-event"></div>
+      <div class="field">
+        <label class="field__label" for="input-done-date">行った日</label>
+        <input type="date" id="input-done-date" required />
+      </div>
+      <div class="field">
+        <label class="field__label" for="input-done-note">どうだった？<span class="field__hint">任意</span></label>
+        <textarea id="input-done-note" maxlength="500" placeholder="例：思っていたより人が少なくて、じっくり観られた"></textarea>
+      </div>
+      <div class="modal__actions">
+        <button type="button" id="btn-done-cancel" class="btn btn--ghost">キャンセル</button>
+        <button type="submit" id="btn-done-submit" class="btn btn--primary">記録する（+50XP）</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- 確認ダイアログ（カスタムUI） -->
+  <div id="confirm-dialog-overlay" class="dialog-overlay">
+    <div class="dialog">
+      <div class="dialog__title" id="confirm-dialog-title">削除しますか？</div>
+      <div class="dialog__text" id="confirm-dialog-text">削除すると元に戻せません。</div>
+      <div class="dialog__actions">
+        <button id="btn-confirm-cancel" class="btn btn--ghost">キャンセル</button>
+        <button id="btn-confirm-ok" class="btn btn--danger">削除する</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 要望送信モーダル -->
+  <div id="feedback-modal-overlay" class="dialog-overlay">
+    <div class="modal">
+      <div class="modal__head">
+        <div class="modal__title">ご意見・ご要望</div>
+        <button id="btn-feedback-close" class="modal__close" aria-label="閉じる">&times;</button>
+      </div>
+      <textarea id="input-feedback-message" rows="5" maxlength="2000" placeholder="ご意見・ご要望・バグ報告など、なんでもどうぞ"></textarea>
+      <div class="modal__actions">
+        <button id="btn-feedback-send" class="btn btn--primary">送信する</button>
+      </div>
+      <p class="modal__note">送信内容は開発者に届きます。個人情報は入力しないでください。</p>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/main.js"></script>
+</body>
+</html>

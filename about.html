@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>レアドロップ日和 — 機能紹介</title>
+<meta name="description" content="ルーティンから一歩だけ外れるお題を1日1回レアドロップのように引いて、やってみたら図鑑が埋まり経験値が育つアプリ。半年に1回のレアイベントも予定に入れられます。">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#9b59b6">
+<meta property="og:title" content="レアドロップ日和 — 機能紹介">
+<meta property="og:image" content="https://rare-drop-biyori.vercel.app/ogp.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --c1: #9b59b6;
+    --c2: #8e44ad;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+    background: #1a1a1a;
+    color: #ececec;
+    line-height: 1.7;
+  }
+  a { color: inherit; text-decoration: none; }
+  .topbar {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 24px 20px 0;
+  }
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 15px;
+    color: #9a9a9a;
+    transition: color .15s ease;
+  }
+  .back-link:hover { color: #fff; }
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background: var(--c1);
+    margin: 24px 20px 0;
+    border-radius: 24px;
+    padding: 64px 24px;
+    text-align: center;
+  }
+  .hero::before, .hero::after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
+    background: #ffffff;
+    opacity: 0.07;
+    filter: blur(10px);
+  }
+  .hero::before { width: 240px; height: 240px; top: -80px; left: -60px; }
+  .hero::after { width: 300px; height: 300px; bottom: -120px; right: -80px; }
+  .badge {
+    position: relative;
+    width: 128px;
+    height: 128px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.94);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--c1);
+    box-shadow: 0 0 0 14px rgba(255,255,255,0.14);
+  }
+  .category-pill {
+    position: relative;
+    display: inline-block;
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 999px;
+    margin-bottom: 16px;
+  }
+  .hero h1 {
+    position: relative;
+    margin: 0 0 12px;
+    font-size: clamp(28px, 5vw, 40px);
+    font-weight: 800;
+    color: #fff;
+  }
+  .hero p.tagline {
+    position: relative;
+    margin: 0 auto 32px;
+    max-width: 520px;
+    font-size: 17px;
+    color: rgba(255,255,255,0.88);
+  }
+  .cta {
+    position: relative;
+    display: inline-block;
+    background: #fff;
+    color: #1a1a1a;
+    font-weight: 700;
+    font-size: 16px;
+    padding: 14px 36px;
+    border-radius: 999px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    transition: transform .15s ease;
+  }
+  .cta:hover { transform: translateY(-2px); }
+
+  .features {
+    max-width: 880px;
+    margin: 56px auto 0;
+    padding: 0 20px;
+  }
+  .features h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 24px;
+    color: #fff;
+  }
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .feature-card {
+    background: #241c29;
+    border: 1px solid #3d2f45;
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .feature-icon {
+    color: var(--c1);
+    font-size: 28px;
+    margin-bottom: 12px;
+  }
+  .feature-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    color: #fff;
+  }
+  .feature-desc {
+    font-size: 15px;
+    color: #cbbdd3;
+    margin: 0;
+  }
+
+  .steps {
+    max-width: 880px;
+    margin: 40px auto 0;
+    padding: 0 20px;
+  }
+  .steps h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin: 0 0 20px;
+    color: #fff;
+  }
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 14px 0;
+    border-top: 1px solid #3d2f45;
+  }
+  .step:first-of-type { border-top: 0; }
+  .step-num {
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--c1);
+    color: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .step p { margin: 0; font-size: 15px; color: #d8cce0; }
+  .step strong { color: #fff; }
+
+  .note {
+    max-width: 880px;
+    margin: 24px auto 0;
+    padding: 0 20px;
+    font-size: 13px;
+    color: #a690b3;
+  }
+
+  .footer-cta {
+    max-width: 880px;
+    margin: 56px auto 0;
+    padding: 0 20px 64px;
+    text-align: center;
+  }
+  .footer-cta .cta {
+    background: var(--c1);
+    color: #fff;
+    box-shadow: none;
+  }
+  .footer-links {
+    margin-top: 20px;
+    font-size: 13px;
+    color: #a690b3;
+  }
+  .footer-links a { color: #9a9a9a; }
+  .footer-links a:hover { color: #fff; }
+</style>
+</head>
+<body>
+  <div class="topbar">
+    <a class="back-link" href="https://apps.yuji-nakamura.com/">← アプリ一覧に戻る</a>
+  </div>
+
+  <section class="hero">
+    <span class="category-pill">学び・成長</span>
+    <div class="badge"><svg width="72" height="72" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14 H44 L54 26 L32 52 L10 26 Z"/><path d="M10 26 H54"/><path d="M26 14 L22 26 L32 52 L42 26 L38 14"/></svg></div>
+    <h1>レアドロップ日和</h1>
+    <p class="tagline">やることに追われて、毎日が予測どおりに埋まっていく。そんなマンネリには、大きな変化より「ルーティンから一歩だけ外れること」が効きます。何が出るかわからないお題を1日1回引いて、やってみたら図鑑が埋まり、経験値が増えていくアプリです。</p>
+    <a class="cta" href="https://rare-drop-biyori.vercel.app">アプリを使ってみる →</a>
+  </section>
+
+  <section class="features">
+    <h2>できること</h2>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="30" height="30" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 28 H54 V52 H10 Z"/><path d="M10 28 C10 18 18 14 32 14 C46 14 54 18 54 28"/><path d="M28 28 V36 H36 V28"/></svg></div>
+        <h3 class="feature-title">1日1回、ドロップを引く</h3>
+        <p class="feature-desc">「入ったことのないお店に入る」「普段は頼まないメニューを頼む」「触ったことのないライブラリを入れてみる」など、ルーティンから一歩だけ外れるお題が1日1回ランダムに出ます。何が出るかはお楽しみ。気が乗らなければ1回だけ引き直せます。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="30" height="30" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14 H44 L54 26 L32 52 L10 26 Z"/><path d="M10 26 H54"/><path d="M26 14 L22 26 L32 52 L42 26 L38 14"/></svg></div>
+        <h3 class="feature-title">コモン・レア・エピック</h3>
+        <p class="feature-desc">お題にはレア度があり、コモン65%・レア28%・エピック7%で出ます。まだやったことのないお題ほど出やすく、前日と同じお題は出ません。エピックが出た日は、ちょっとした冒険の日です。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="30" height="30" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><rect x="12" y="8" width="40" height="48" rx="4"/><path d="M20 20 H44"/><path d="M20 30 H44"/><path d="M20 40 H34"/></svg></div>
+        <h3 class="feature-title">ドロップ図鑑</h3>
+        <p class="feature-desc">やってみたお題が図鑑に埋まっていきます。まだ出ていないお題は「？？？」のまま。「まち・お店」「たべる・のむ」「あそぶ・ふれる」「つくる・ビルド」の4カテゴリで、自分だけのお題も追加できます。合わないお題は「出さない」にできます。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="30" height="30" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 34 L26 46 L50 18"/></svg></div>
+        <h3 class="feature-title">当たり・ふつう・ハズレ</h3>
+        <p class="feature-desc">やってみたら、結果とひとことを記録。ハズレも立派な経験値です。当たり率やカテゴリごとの回数で、自分がどんな寄り道を楽しめるのかが見えてきます。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="30" height="30" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><rect x="10" y="14" width="44" height="40" rx="4"/><path d="M10 26 H54"/><path d="M22 8 V18"/><path d="M42 8 V18"/><path d="M32 32 L35 39 L42 40 L37 45 L38 52 L32 48 L26 52 L27 45 L22 40 L29 39 Z"/></svg></div>
+        <h3 class="feature-title">レアイベント枠</h3>
+        <p class="feature-desc">美術館・ライブ・イベントなど、半年に1回レベルの非日常を予定として入れておけます。当日までのカウントダウンつき。予定がない、または前回から半年たつと、次の予定を入れるよう声をかけます。</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><svg width="30" height="30" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 50 H52"/><path d="M18 50 V36"/><path d="M28 50 V24"/><path d="M38 50 V30"/><path d="M48 50 V16"/></svg></div>
+        <h3 class="feature-title">経験値とレベル</h3>
+        <p class="feature-desc">コモン10・レア20・エピック40XP。ドロップに従ってやってみると+5、ひとことを残すと+5、レアイベントは+50。いつもの村人から見習い冒険者、トレジャーハンター、伝説のレアハンターへ。数字が増えていくこと自体が、成長の見える化になります。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="steps">
+    <h2>使い方</h2>
+    <div class="step">
+      <span class="step-num">1</span>
+      <p><strong>Googleでログイン</strong>：記録はあなた専用の領域に保存され、スマホとパソコンで同じデータを見られます。</p>
+    </div>
+    <div class="step">
+      <span class="step-num">2</span>
+      <p><strong>きょうのドロップを引く</strong>：朝でも休み時間でも、1日1回。出たお題は、きょうのうちに気が向いたらやってみましょう。やらずに「きょうはパス」でも大丈夫です。</p>
+    </div>
+    <div class="step">
+      <span class="step-num">3</span>
+      <p><strong>やってみたら記録する</strong>：「当たり・ふつう・ハズレ」とひとことを残すと、図鑑が埋まって経験値が入ります。</p>
+    </div>
+    <div class="step">
+      <span class="step-num">4</span>
+      <p><strong>レアイベントを予定に入れておく</strong>：半年に1回の非日常は、先に枠を取っておくのがコツ。行ってきたら記録して+50XP。</p>
+    </div>
+  </section>
+
+  <p class="note">※ 週に1つの「あき枠」や「いつかやる」の整理は、姉妹アプリ「大人の寄り道探検隊」でできます。</p>
+
+  <section class="footer-cta">
+    <a class="cta" href="https://rare-drop-biyori.vercel.app">今すぐ使ってみる →</a>
+    <p class="footer-links"><a href="https://apps.yuji-nakamura.com/">他のアプリも見る</a></p>
+  </section>
+</body>
+</html>

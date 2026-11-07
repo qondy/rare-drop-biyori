@@ -1,0 +1,67 @@
+// Colors — アメジスト（レアドロップの宝石色。OGPサムネイルと統一）
+$color-bg: #f7f3f9;
+$color-surface: #ffffff;
+$color-surface-2: #f0e8f4;
+$color-surface-3: #dfcde8;
+$color-primary: #9b59b6;
+$color-primary-hover: #8e44ad;
+$color-primary-ink: #6c3483; // 白地の上で文字として使う濃いアメジスト
+$color-primary-soft: #f4ecf8;
+$color-danger: #dc2626;
+$color-text: #1d1d1f;
+$color-text-muted: #55526a;
+$color-border: #e6dcec;
+
+// レア度の色（primaryには追従させない）
+$rarity-colors: (
+  common: #5f6b7a,
+  rare: #1d6fd1,
+  epic: #c25e00,
+);
+$rarity-soft: (
+  common: #eef0f3,
+  rare: #e3eefc,
+  epic: #fdeedd,
+);
+
+// 結果の色
+$color-hit: #c25e00;
+$color-hit-soft: #fdeedd;
+$color-normal: #1d6fd1;
+$color-normal-soft: #e3eefc;
+$color-miss: #5f6b7a;
+$color-miss-soft: #eef0f3;
+
+// カテゴリの色
+$category-colors: (
+  town: #0f7a6c,
+  taste: #b8410f,
+  play: #a1288a,
+  build: #2f55c9,
+);
+
+// Typography
+$font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif;
+$font-size-xs: 13px;
+$font-size-sm: 14px;
+$font-size-base: 16px;
+$font-size-lg: 18px;
+$font-size-xl: 22px;
+$font-size-2xl: 28px;
+
+// Spacing
+$spacing-xs: 4px;
+$spacing-sm: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+$spacing-2xl: 48px;
+
+// Border radius
+$radius-sm: 6px;
+$radius-md: 10px;
+$radius-lg: 16px;
+
+// Breakpoints
+$bp-mobile: 480px;
+$bp-tablet: 768px;
