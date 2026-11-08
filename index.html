@@ -169,8 +169,22 @@
         </div>
 
         <div class="section">
-          <div class="section__head"><h3 class="section__title">やってみた記録</h3></div>
-          <div id="rec-list" class="log-list"></div>
+          <div class="section__head">
+            <h3 class="section__title">はじめた頃と今</h3>
+            <p class="section__desc">最初の数回と最近の数回を、同じ回数どうしでくらべます</p>
+          </div>
+          <div id="rec-compare" class="compare card-surface"></div>
+        </div>
+
+        <div class="section">
+          <div class="section__head section__head--row section__head--timeline">
+            <h3 class="section__title">これまでの行動 <span class="section__count" id="rec-count"></span></h3>
+            <div class="order-toggle" role="radiogroup" aria-label="並び順">
+              <button type="button" class="order-toggle__btn" data-order="asc" role="radio" aria-checked="false">はじめから</button>
+              <button type="button" class="order-toggle__btn is-active" data-order="desc" role="radio" aria-checked="true">最近から</button>
+            </div>
+          </div>
+          <div id="rec-list" class="timeline"></div>
         </div>
       </section>
 

@@ -16,6 +16,7 @@ import {
 import {
   allQuests, activeQuests, logXp, totalXp, countByQuest, drawQuest, hitRate, weekStreak,
   daysBetween, plannedEvents, doneEvents, discoveryByRarity,
+  buildTimeline, compareStartNow, TimelineEntry,
 } from './stats';
 import { Category, CustomQuest, Draw, Log, Quest, RareEvent, Rarity, Result, Settings } from './types';
 import { initClickTracking, track } from './analytics';
@@ -72,6 +73,9 @@ const recHit = $('rec-hit');
 const recEvents = $('rec-events');
 const recCats = $('rec-cats');
 const recList = $('rec-list');
+const recCompare = $('rec-compare');
+const recCount = $('rec-count');
+const orderButtons = document.querySelectorAll<HTMLButtonElement>('.order-toggle__btn');
 
 const logOverlay = $('log-modal-overlay');
 const logForm = $<HTMLFormElement>('log-form');
@@ -148,6 +152,7 @@ const state = {
   tab: 'today' as Tab,
   zukanFilter: 'all' as Category | 'all',
   reveal: false,
+  recOrder: 'desc' as 'asc' | 'desc',
   justDrew: false,
   pending: new Set<string>(),
   confirmAction: null as null | (() => Promise<void>),
@@ -586,12 +591,140 @@ function renderRecord(): void {
     recCats.append(row);
   });
 
-  recList.replaceChildren();
-  if (state.logs.length === 0) {
-    recList.append(emptyState('まだ記録がありません。きょうのドロップを引いてみましょう'));
-  } else {
-    state.logs.forEach((l) => recList.append(logItem(l, true)));
+  renderCompare();
+  renderTimeline();
+}
+
+/** はじめた頃と今：最初の数回と最近の数回を同じ回数でくらべる */
+function renderCompare(): void {
+  recCompare.replaceChildren();
+  const cmp = compareStartNow(state.logs);
+  if (!cmp) {
+    recCompare.append(emptyState(state.logs.length === 0
+      ? 'やってみた記録が2つ以上になると、はじめた頃と今をくらべられます'
+      : 'あと1回やってみると、はじめた頃と今をくらべられます'));
+    return;
   }
+  const { start, now } = cmp;
+  const first = start.from;
+  const days = daysBetween(first, todayKey()) + 1;
+  const head = document.createElement('div');
+  head.className = 'compare__head';
+  head.append(
+    textEl('p', 'compare__since', `${shortDate(first)}にはじめて ${days}日目`),
+    textEl('p', 'compare__basis', `最初の${start.count}回 と 最近の${now.count}回 をくらべています`),
+  );
+
+  const table = document.createElement('div');
+  table.className = 'compare__table';
+  const cols = document.createElement('div');
+  cols.className = 'compare__row compare__row--head';
+  cols.append(textEl('span', 'compare__label', ''), textEl('span', 'compare__col', 'はじめた頃'), textEl('span', 'compare__col compare__col--now', '今'));
+  table.append(cols);
+
+  const metric = (label: string, a: number, b: number, unit: string): void => {
+    const row = document.createElement('div');
+    row.className = 'compare__row';
+    const diff = b - a;
+    const nowCell = document.createElement('span');
+    nowCell.className = 'compare__value compare__value--now';
+    nowCell.append(`${b}${unit}`);
+    if (diff !== 0) {
+      nowCell.append(textEl('span', `compare__diff compare__diff--${diff > 0 ? 'up' : 'down'}`, `${diff > 0 ? '+' : ''}${diff}`));
+    }
+    row.append(textEl('span', 'compare__label', label), textEl('span', 'compare__value', `${a}${unit}`), nowCell);
+    table.append(row);
+  };
+  metric('当たり率', start.hitRate, now.hitRate, '%');
+  metric('レア以上の割合', start.rareRate, now.rareRate, '%');
+  metric('試したカテゴリ', start.categories, now.categories, '種');
+  metric('ひとこと率', start.noteRate, now.noteRate, '%');
+
+  const timeline = buildTimeline(state.logs, state.events);
+  const lvNow = levelOf(totalXp(state.logs, state.events));
+  const found = new Set(state.logs.map((l) => l.questId)).size;
+  const sum = document.createElement('div');
+  sum.className = 'compare__summary';
+  sum.append(
+    summaryChip('レベル', `Lv.1 → Lv.${lvNow.level}`),
+    summaryChip('行動の数', `${timeline.length}回`),
+    summaryChip('出会ったお題', `${found}種`),
+  );
+  recCompare.append(head, table, sum);
+}
+
+function summaryChip(label: string, value: string): HTMLElement {
+  const el = document.createElement('div');
+  el.className = 'compare__chip';
+  el.append(textEl('span', 'compare__chip-label', label), textEl('span', 'compare__chip-value', value));
+  return el;
+}
+
+/** これまでの行動：やってみた記録と行ってきたレアイベントを月ごとに並べる */
+function renderTimeline(): void {
+  const entries = buildTimeline(state.logs, state.events);
+  recCount.textContent = entries.length ? `${entries.length}回` : '';
+  orderButtons.forEach((b) => {
+    const active = b.dataset.order === state.recOrder;
+    b.classList.toggle('is-active', active);
+    b.setAttribute('aria-checked', String(active));
+  });
+  recList.replaceChildren();
+  if (entries.length === 0) {
+    recList.append(emptyState('まだ記録がありません。きょうのドロップを引いてみましょう'));
+    return;
+  }
+  const ordered = state.recOrder === 'asc' ? entries : [...entries].reverse();
+  let month = '';
+  let group: HTMLElement | null = null;
+  ordered.forEach((e) => {
+    const m = e.date.slice(0, 7);
+    if (m !== month || !group) {
+      month = m;
+      const [y, mo] = m.split('-').map(Number);
+      const n = entries.filter((x) => x.date.startsWith(m)).length;
+      const head = document.createElement('div');
+      head.className = 'timeline__month';
+      head.append(textEl('span', 'timeline__month-label', `${y}年${mo}月`), textEl('span', 'timeline__month-count', `${n}回`));
+      group = document.createElement('div');
+      group.className = 'timeline__group log-list';
+      recList.append(head, group);
+    }
+    group.append(timelineItem(e));
+  });
+}
+
+function timelineItem(e: TimelineEntry): HTMLElement {
+  const wrap = document.createElement('div');
+  wrap.className = 'timeline__item';
+  const meta = document.createElement('div');
+  meta.className = 'timeline__meta';
+  meta.append(textEl('span', 'timeline__no', `No.${e.no}`));
+  if (e.no === 1) meta.append(textEl('span', 'timeline__tag', 'はじめの一歩'));
+  if (e.levelUp) meta.append(textEl('span', 'timeline__tag timeline__tag--level', `Lv.${e.levelUp}にアップ`));
+  wrap.append(meta);
+  if (e.kind === 'log') {
+    wrap.append(logItem(e.log, true));
+  } else {
+    const item = document.createElement('div');
+    item.className = 'log-item log-item--event';
+    const head = document.createElement('div');
+    head.className = 'log-item__head';
+    head.append(textEl('span', 'rarity rarity--event', 'レアイベント'), textEl('span', 'log-item__date', shortDate(e.date)));
+    item.append(head, textEl('p', 'log-item__title', e.event.title));
+    if (e.event.note.trim()) {
+      const memo = document.createElement('div');
+      memo.className = 'log-item__note';
+      renderMemoView(memo, e.event.note, { clampLines: 3 });
+      item.append(memo);
+    }
+    const foot = document.createElement('div');
+    foot.className = 'log-item__foot';
+    foot.append(textEl('span', 'log-item__xp', `+${XP_EVENT}XP`));
+    item.append(foot);
+    wrap.append(item);
+  }
+  return wrap;
 }
 
 function renderFab(): void {
@@ -992,6 +1125,13 @@ document.addEventListener('keydown', (e) => {
 // Tabs / buttons
 // ============================================================
 tabButtons.forEach((b) => b.addEventListener('click', () => switchTab((b.dataset.tab as Tab) || 'today')));
+orderButtons.forEach((b) => b.addEventListener('click', () => {
+  const order = b.dataset.order === 'asc' ? 'asc' : 'desc';
+  if (order === state.recOrder) return;
+  state.recOrder = order;
+  track('timeline_order', { order });
+  renderTimeline();
+}));
 
 btnFab.addEventListener('click', () => {
   if (state.tab === 'events') openEventModal(null);

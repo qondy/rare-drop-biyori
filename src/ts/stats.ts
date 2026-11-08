@@ -1,5 +1,5 @@
 import { CustomQuest, Log, Quest, RareEvent, Rarity, Settings } from './types';
-import { PRESET_QUESTS, RARITIES, rarityOf, XP_DROP_BONUS, XP_NOTE_BONUS, XP_EVENT } from './options';
+import { PRESET_QUESTS, RARITIES, rarityOf, levelOf, XP_DROP_BONUS, XP_NOTE_BONUS, XP_EVENT } from './options';
 import { parseKey, weekStart, addDays } from './dates';
 
 /** ドロップの対象になるお題（出さないことにしたプリセットは除く） */
@@ -110,4 +110,68 @@ export function discoveryByRarity(pool: Quest[], counts: Map<string, number>): {
     const list = pool.filter((q) => q.rarity === r.key);
     return { rarity: r.key, found: list.filter((q) => (counts.get(q.id) ?? 0) > 0).length, total: list.length };
   });
+}
+
+// ============================================================
+// これまでの行動（はじめた頃と今の比較・年表）
+// ============================================================
+export type TimelineEntry =
+  | { kind: 'log'; no: number; date: string; log: Log; levelUp: number | null }
+  | { kind: 'event'; no: number; date: string; event: RareEvent; levelUp: number | null };
+
+/** やってみた記録と行ってきたレアイベントを古い順に並べ、通し番号と「この行動でレベルが上がったか」を付ける */
+export function buildTimeline(logs: Log[], events: RareEvent[]): TimelineEntry[] {
+  const items: { date: string; at: number; xp: number; entry: (no: number, levelUp: number | null) => TimelineEntry }[] = [
+    ...logs.map((l) => ({
+      date: l.date, at: l.createdAt, xp: logXp(l),
+      entry: (no: number, levelUp: number | null): TimelineEntry => ({ kind: 'log', no, date: l.date, log: l, levelUp }),
+    })),
+    ...events.filter((e) => e.status === 'done' && e.doneDate).map((e) => ({
+      date: e.doneDate, at: e.createdAt, xp: XP_EVENT,
+      entry: (no: number, levelUp: number | null): TimelineEntry => ({ kind: 'event', no, date: e.doneDate, event: e, levelUp }),
+    })),
+  ];
+  items.sort((a, b) => a.date.localeCompare(b.date) || a.at - b.at);
+  let xp = 0;
+  let level = 1;
+  return items.map((it, i) => {
+    xp += it.xp;
+    const next = levelOf(xp).level;
+    const up = next > level ? next : null;
+    level = next;
+    return it.entry(i + 1, up);
+  });
+}
+
+export interface PeriodSummary {
+  count: number;
+  from: string;
+  to: string;
+  hitRate: number; // %
+  rareRate: number; // レア以上の割合 %
+  categories: number; // 試したカテゴリの数
+  noteRate: number; // ひとことを残した割合 %
+}
+
+function summarize(list: Log[]): PeriodSummary {
+  const pct = (n: number): number => Math.round((n / list.length) * 100);
+  return {
+    count: list.length,
+    from: list[0].date,
+    to: list[list.length - 1].date,
+    hitRate: pct(list.filter((l) => l.result === 'hit').length),
+    rareRate: pct(list.filter((l) => l.rarity !== 'common').length),
+    categories: new Set(list.map((l) => l.category)).size,
+    noteRate: pct(list.filter((l) => l.note.trim()).length),
+  };
+}
+
+export const COMPARE_SIZE = 5;
+
+/** 最初の数回と最近の数回をくらべる（同じ回数どうしで比較。記録が2件未満なら null） */
+export function compareStartNow(logs: Log[]): { start: PeriodSummary; now: PeriodSummary } | null {
+  if (logs.length < 2) return null;
+  const asc = [...logs].sort((a, b) => a.date.localeCompare(b.date) || a.createdAt - b.createdAt);
+  const n = Math.min(COMPARE_SIZE, Math.floor(asc.length / 2));
+  return { start: summarize(asc.slice(0, n)), now: summarize(asc.slice(-n)) };
 }

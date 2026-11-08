@@ -939,3 +939,254 @@
     flex-shrink: 0;
   }
 }
+
+// ===== はじめた頃と今 =====
+.section__count {
+  font-size: $font-size-sm;
+  font-weight: 700;
+  color: $color-text-muted;
+  margin-left: 4px;
+  white-space: nowrap;
+}
+
+.section__head--timeline {
+  flex-wrap: wrap;
+  align-items: center;
+  row-gap: $spacing-sm;
+
+  .section__title {
+    white-space: nowrap;
+  }
+}
+
+.compare {
+  padding: $spacing-md;
+
+  &__head {
+    margin-bottom: $spacing-sm;
+  }
+
+  &__since {
+    font-weight: 800;
+    color: $color-primary-ink;
+  }
+
+  &__basis {
+    font-size: $font-size-xs;
+    color: $color-text-muted;
+    margin-top: 2px;
+  }
+
+  &__table {
+    display: grid;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr) minmax(0, 1.2fr);
+    align-items: center;
+    gap: $spacing-sm;
+    padding: 8px 0;
+    border-top: 1px solid $color-border;
+
+    &--head {
+      border-top: none;
+      padding-top: 0;
+    }
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: 700;
+  }
+
+  &__col {
+    font-size: $font-size-xs;
+    font-weight: 700;
+    color: $color-text-muted;
+    text-align: right;
+
+    &--now {
+      color: $color-primary-ink;
+    }
+  }
+
+  &__value {
+    font-size: $font-size-base;
+    font-weight: 700;
+    color: $color-text-muted;
+    text-align: right;
+    white-space: nowrap;
+
+    &--now {
+      font-size: $font-size-lg;
+      font-weight: 800;
+      color: $color-text;
+    }
+  }
+
+  &__diff {
+    display: inline-block;
+    margin-left: 4px;
+    padding: 0 6px;
+    border-radius: 999px;
+    font-size: $font-size-xs;
+    font-weight: 800;
+    vertical-align: 2px;
+
+    &--up {
+      color: $color-primary-ink;
+      background: $color-primary-soft;
+    }
+
+    &--down {
+      color: $color-text-muted;
+      background: $color-surface-2;
+    }
+  }
+
+  &__summary {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: $spacing-sm;
+    margin-top: $spacing-md;
+  }
+
+  &__chip {
+    background: $color-surface-2;
+    border-radius: $radius-md;
+    padding: 8px 6px;
+    text-align: center;
+    min-width: 0;
+  }
+
+  &__chip-label {
+    display: block;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    color: $color-text-muted;
+  }
+
+  &__chip-value {
+    display: block;
+    font-weight: 800;
+    color: $color-primary-ink;
+    overflow-wrap: anywhere;
+  }
+}
+
+// ===== これまでの行動 =====
+.order-toggle {
+  display: inline-flex;
+  flex-shrink: 0;
+  padding: 3px;
+  border-radius: 999px;
+  background: $color-surface-2;
+
+  &__btn {
+    min-height: 36px;
+    padding: 0 12px;
+    border-radius: 999px;
+    font-size: $font-size-xs;
+    font-weight: 700;
+    color: $color-text-muted;
+
+    &.is-active {
+      background: $color-surface;
+      color: $color-primary-ink;
+      box-shadow: 0 1px 4px rgba($color-primary, 0.18);
+    }
+  }
+}
+
+.timeline {
+  &__month {
+    display: flex;
+    align-items: baseline;
+    gap: $spacing-sm;
+    margin: $spacing-md 0 $spacing-sm;
+
+    &:first-child {
+      margin-top: 0;
+    }
+  }
+
+  &__month-label {
+    font-weight: 800;
+  }
+
+  &__month-count {
+    font-size: $font-size-xs;
+    font-weight: 700;
+    color: $color-text-muted;
+  }
+
+  &__group {
+    position: relative;
+    padding-left: 14px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 4px;
+      top: 4px;
+      bottom: 4px;
+      width: 2px;
+      border-radius: 2px;
+      background: $color-surface-3;
+    }
+  }
+
+  &__item {
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -14px;
+      top: 5px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: $color-primary;
+      box-shadow: 0 0 0 2px $color-bg;
+    }
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  &__no {
+    font-size: $font-size-xs;
+    font-weight: 800;
+    color: $color-primary-ink;
+  }
+
+  &__tag {
+    font-size: $font-size-xs;
+    font-weight: 700;
+    padding: 0 8px;
+    border-radius: 999px;
+    color: $color-primary-ink;
+    background: $color-primary-soft;
+
+    &--level {
+      color: #ffffff;
+      background: $color-primary;
+    }
+  }
+}
+
+.log-item--event {
+  border-left-color: $color-primary;
+}
+
+.rarity--event {
+  color: $color-primary-ink;
+  background: $color-primary-soft;
+}
