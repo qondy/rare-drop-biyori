@@ -9,7 +9,7 @@ import {
 } from './options';
 import {
   subscribeQuests, subscribeDraws, subscribeLogs, subscribeEvents, subscribeSettings,
-  createQuest, updateQuest, deleteQuest, saveHidden, saveDraw, setDrawStatus,
+  createQuest, updateQuest, deleteQuest, markNope, restoreQuest, saveDraw, setDrawStatus,
   createLog, updateLog, deleteLog, createEvent, updateEventPlan, completeEvent, reopenEvent, deleteEvent,
   QuestInput, MAX_TITLE,
 } from './store';
@@ -74,6 +74,16 @@ const recEvents = $('rec-events');
 const recCats = $('rec-cats');
 const recList = $('rec-list');
 const recCompare = $('rec-compare');
+const recNope = $('rec-nope');
+const recNopeCount = $('rec-nope-count');
+const logNopeRow = $('log-nope-row');
+const inputLogNope = $<HTMLInputElement>('input-log-nope');
+const nopeOverlay = $('nope-modal-overlay');
+const nopeForm = $<HTMLFormElement>('nope-form');
+const nopeModalTitle = $('nope-modal-title');
+const nopeQuest = $('nope-quest');
+const inputNopeReason = $<HTMLTextAreaElement>('input-nope-reason');
+const btnNopeSubmit = $<HTMLButtonElement>('btn-nope-submit');
 const recCount = $('rec-count');
 const orderButtons = document.querySelectorAll<HTMLButtonElement>('.order-toggle__btn');
 
@@ -147,7 +157,7 @@ const state = {
   draws: [] as Draw[],
   logs: [] as Log[],
   events: [] as RareEvent[],
-  settings: { hidden: [] } as Settings,
+  settings: { hidden: [], nope: {} } as Settings,
   loaded: false,
   tab: 'today' as Tab,
   zukanFilter: 'all' as Category | 'all',
@@ -164,6 +174,7 @@ const state = {
   questCategory: 'town' as Category,
   questRarity: 'common' as Rarity,
   detailQuestId: null as string | null,
+  nopeQuestId: null as string | null,
   eventEditingId: null as string | null,
   doneEventId: null as string | null,
 };
@@ -592,6 +603,7 @@ function renderRecord(): void {
   });
 
   renderCompare();
+  renderNope();
   renderTimeline();
 }
 
@@ -762,6 +774,11 @@ function renderLogResults(): void {
     state.logResult = r.key;
     renderLogResults();
   }, `seg seg--${r.key}`)));
+  // ハズレのときだけ「もうやらない」を選べる（すでにもうやらないお題は出さない）
+  const questId = state.logEditing?.quest.id ?? '';
+  const show = state.logResult === 'miss' && !state.settings.hidden.includes(questId);
+  logNopeRow.classList.toggle('hidden', !show);
+  if (!show) inputLogNope.checked = false;
 }
 
 function openLogModal(editing: LogEditing): void {
@@ -772,6 +789,7 @@ function openLogModal(editing: LogEditing): void {
   inputLogDate.value = log ? log.date : (editing.drawDate ?? todayKey());
   inputLogDate.max = todayKey();
   state.logResult = log ? log.result : 'hit';
+  inputLogNope.checked = false;
   renderLogResults();
   inputLogNote.value = log ? log.note : '';
   autoGrow(inputLogNote);
@@ -818,7 +836,10 @@ logForm.addEventListener('submit', async (e) => {
   } else {
     showToast('保存しました');
   }
+  const nope = inputLogNope.checked && state.logResult === 'miss';
   closeLogModal();
+  // 合わなかったなら、続けて理由を残してもらう
+  if (nope) openNopeModal(quest.id);
 });
 
 btnLogDelete.addEventListener('click', () => {
@@ -940,22 +961,112 @@ function renderDetail(): void {
   }
   if (quest.custom) {
     const custom = state.quests.find((c) => c.id === quest.id) ?? null;
-    detailActions.append(button('編集', 'btn btn--ghost btn--sm', () => openQuestModal(custom)));
-  } else {
-    const toggle = button(isHidden ? 'ドロップに戻す' : 'このお題は出さない', 'btn btn--ghost btn--sm', () => {
-      const uid = state.uid;
-      if (!uid) return;
-      const next = isHidden
-        ? state.settings.hidden.filter((h) => h !== quest.id)
-        : [...state.settings.hidden, quest.id];
-      void run('hidden', () => saveHidden(uid, next), '更新に失敗しました').then((ok) => {
-        if (ok) showToast(isHidden ? 'ドロップに戻しました' : 'このお題はドロップに出なくなります');
-      });
-    });
-    toggle.disabled = state.pending.has('hidden');
-    detailActions.append(toggle);
+    detailActions.append(button('編集', 'btn btn--ghost btn--sm', () => {
+      state.detailQuestId = null;
+      closeOverlay(detailOverlay);
+      openQuestModal(custom);
+    }));
+  }
+  if (isHidden) {
+    detailActions.append(button('理由を書く', 'btn btn--ghost btn--sm', () => openNopeModal(quest.id)));
+    const back = button('もう一度ためす', 'btn btn--ghost btn--sm', () => restore(quest.id));
+    back.disabled = state.pending.has('nope');
+    detailActions.append(back);
+  } else if (!veiled) {
+    detailActions.append(button('もうやらない', 'btn btn--ghost btn--sm', () => openNopeModal(quest.id)));
   }
 }
+
+// ============================================================
+// もうやらない（合わなかったこと）
+// ============================================================
+function openNopeModal(questId: string): void {
+  const quest = questById(questId);
+  if (!quest) return;
+  state.nopeQuestId = questId;
+  const note = state.settings.nope[questId];
+  const already = state.settings.hidden.includes(questId);
+  nopeModalTitle.textContent = already ? '合わなかった理由' : 'もうやらないことにする';
+  btnNopeSubmit.textContent = already ? '保存する' : 'もうやらない';
+  nopeQuest.replaceChildren(questHeader(quest.title, quest.category, quest.rarity));
+  inputNopeReason.value = note?.reason ?? '';
+  autoGrow(inputNopeReason);
+  inputNopeReason.dispatchEvent(new Event('input'));
+  openOverlay(nopeOverlay);
+}
+
+function closeNopeModal(): void {
+  state.nopeQuestId = null;
+  closeOverlay(nopeOverlay);
+}
+
+function restore(questId: string): void {
+  const uid = state.uid;
+  if (!uid) return;
+  void run('nope', () => restoreQuest(uid, questId), '更新に失敗しました').then((ok) => {
+    if (!ok) return;
+    showToast('ドロップに戻しました。また出会えるかも');
+    track('quest_restore');
+  });
+}
+
+function renderNope(): void {
+  const counts = countByQuest(state.logs);
+  const list = allQuests(state.quests)
+    .filter((q) => state.settings.hidden.includes(q.id))
+    .map((q) => ({ q, note: state.settings.nope[q.id] }))
+    .sort((a, b) => (b.note?.date || '').localeCompare(a.note?.date || ''));
+  recNopeCount.textContent = list.length ? `${list.length}件` : '';
+  recNope.replaceChildren();
+  if (list.length === 0) {
+    recNope.append(emptyState('まだありません。やってみて合わなかったお題は、記録するときやお題の詳細から「もうやらない」にできます'));
+    return;
+  }
+  list.forEach(({ q, note }) => {
+    const item = document.createElement('div');
+    item.className = 'nope-item';
+    const head = document.createElement('div');
+    head.className = 'nope-item__head';
+    head.append(categoryBadge(q.category));
+    if (note?.date) head.append(textEl('span', 'nope-item__date', `${shortDate(note.date)}に決めた`));
+    const tried = counts.get(q.id) ?? 0;
+    const misses = state.logs.filter((l) => l.questId === q.id && l.result === 'miss').length;
+    head.append(textEl('span', 'nope-item__tried', tried ? `${tried}回やってみた${misses ? `（ハズレ${misses}）` : ''}` : 'やらずに決めた'));
+    item.append(head, textEl('p', 'nope-item__title', q.title));
+    if (note?.reason.trim()) {
+      const memo = document.createElement('div');
+      memo.className = 'nope-item__reason';
+      renderMemoView(memo, note.reason, { clampLines: 3 });
+      item.append(memo);
+    }
+    const foot = document.createElement('div');
+    foot.className = 'nope-item__foot';
+    foot.append(button(note?.reason.trim() ? '理由を編集' : '理由を書く', 'btn btn--ghost btn--sm', () => openNopeModal(q.id)));
+    const back = button('もう一度ためす', 'btn btn--ghost btn--sm', () => restore(q.id));
+    back.disabled = state.pending.has('nope');
+    foot.append(back);
+    item.append(foot);
+    recNope.append(item);
+  });
+}
+
+nopeForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const uid = state.uid;
+  const id = state.nopeQuestId;
+  if (!uid || !id) return;
+  const already = state.settings.hidden.includes(id);
+  const date = state.settings.nope[id]?.date || todayKey();
+  btnNopeSubmit.disabled = true;
+  const ok = await run('nope', () => markNope(uid, id, inputNopeReason.value, date), '保存に失敗しました');
+  btnNopeSubmit.disabled = false;
+  if (!ok) return;
+  showToast(already ? '保存しました' : 'もうやらないことに追加しました。ドロップには出ません');
+  if (!already) track('quest_nope', { has_reason: inputNopeReason.value.trim() ? 1 : 0 });
+  closeNopeModal();
+});
+$('btn-nope-close').addEventListener('click', closeNopeModal);
+$('btn-nope-cancel').addEventListener('click', closeNopeModal);
 
 // ============================================================
 // レアイベントモーダル
@@ -1117,6 +1228,7 @@ document.addEventListener('keydown', (e) => {
     return;
   }
   closeLogModal();
+  closeNopeModal();
   [questOverlay, detailOverlay, eventOverlay, doneOverlay, feedbackOverlay].forEach(closeOverlay);
   state.detailQuestId = null;
 });
@@ -1187,7 +1299,7 @@ onAuthChange((user: User | null) => {
     state.draws = [];
     state.logs = [];
     state.events = [];
-    state.settings = { hidden: [] };
+    state.settings = { hidden: [], nope: {} };
     state.loaded = false;
     loginScreen.classList.remove('hidden');
     appEl.classList.add('hidden');

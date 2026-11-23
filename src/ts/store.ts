@@ -1,8 +1,9 @@
 import {
   collection, doc, onSnapshot, setDoc, addDoc, updateDoc, deleteDoc, serverTimestamp, writeBatch,
+  arrayUnion, arrayRemove, deleteField,
 } from 'firebase/firestore';
 import { db } from './firebase';
-import { CustomQuest, Draw, Log, RareEvent, Settings, Category, Rarity, Result, DrawStatus, EventStatus } from './types';
+import { CustomQuest, Draw, Log, NopeNote, RareEvent, Settings, Category, Rarity, Result, DrawStatus, EventStatus } from './types';
 import { CATEGORY_KEYS, RARITY_KEYS, RESULT_KEYS } from './options';
 
 const DRAW_STATUSES: DrawStatus[] = ['drawn', 'done', 'skipped'];
@@ -11,6 +12,7 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 export const MAX_TITLE = 60;
 export const MAX_NOTE = 500;
+export const MAX_REASON = 200;
 
 const str = (v: unknown): string => (typeof v === 'string' ? v : '');
 const dateStr = (v: unknown): string => (typeof v === 'string' && DATE_RE.test(v) ? v : '');
@@ -130,7 +132,15 @@ export function subscribeSettings(uid: string, onData: (s: Settings) => void, on
     const hidden = Array.isArray(data.hidden)
       ? (data.hidden as unknown[]).filter((v): v is string => typeof v === 'string')
       : [];
-    onData({ hidden });
+    const nope: Record<string, NopeNote> = {};
+    if (data.nope && typeof data.nope === 'object') {
+      Object.entries(data.nope as Record<string, unknown>).forEach(([id, v]) => {
+        if (!v || typeof v !== 'object') return;
+        const o = v as Record<string, unknown>;
+        nope[id] = { reason: str(o.reason), date: dateStr(o.date) };
+      });
+    }
+    onData({ hidden, nope });
   }, onError);
 }
 
@@ -164,8 +174,20 @@ export async function deleteQuest(uid: string, id: string): Promise<void> {
   await deleteDoc(questDoc(uid, id));
 }
 
-export async function saveHidden(uid: string, hidden: string[]): Promise<void> {
-  await setDoc(settingsDoc(uid), { hidden }, { merge: true });
+/** 合わなかったので、もうやらない（ドロップに出さない＋理由を残す）。理由の編集にも使う */
+export async function markNope(uid: string, questId: string, reason: string, date: string): Promise<void> {
+  await setDoc(settingsDoc(uid), {
+    hidden: arrayUnion(questId),
+    nope: { [questId]: { reason: reason.trim().slice(0, MAX_REASON), date } },
+  }, { merge: true });
+}
+
+/** もう一度ためす（ドロップに戻す） */
+export async function restoreQuest(uid: string, questId: string): Promise<void> {
+  await setDoc(settingsDoc(uid), {
+    hidden: arrayRemove(questId),
+    nope: { [questId]: deleteField() },
+  }, { merge: true });
 }
 
 // ============================================================

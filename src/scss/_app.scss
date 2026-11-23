@@ -1190,3 +1190,82 @@
   color: $color-primary-ink;
   background: $color-primary-soft;
 }
+
+// ===== もうやらないこと =====
+.toggle--nope {
+  display: flex;
+  align-items: flex-start;
+  min-height: 36px;
+  padding: $spacing-sm $spacing-md;
+  border-radius: $radius-md;
+  background: $color-miss-soft;
+  color: $color-text;
+  line-height: 1.5;
+
+  input {
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+}
+
+.modal__note {
+  font-size: $font-size-xs;
+  color: $color-text-muted;
+  line-height: 1.6;
+  margin: -#{$spacing-sm} 0 $spacing-md;
+}
+
+.nope-list {
+  display: grid;
+  gap: $spacing-sm;
+}
+
+.nope-item {
+  background: $color-surface;
+  border-radius: $radius-md;
+  padding: $spacing-md;
+  box-shadow: 0 2px 8px rgba($color-primary, 0.06);
+  border-left: 4px solid $color-miss;
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  &__date,
+  &__tried {
+    font-size: $font-size-xs;
+    font-weight: 600;
+    color: $color-text-muted;
+  }
+
+  &__tried {
+    margin-left: auto;
+  }
+
+  &__title {
+    font-weight: 700;
+    line-height: 1.5;
+    color: $color-text-muted;
+    overflow-wrap: anywhere;
+  }
+
+  &__reason {
+    margin-top: 6px;
+    padding: $spacing-sm;
+    border-radius: $radius-sm;
+    background: $color-surface-2;
+    font-size: $font-size-sm;
+  }
+
+  &__foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: $spacing-sm;
+    margin-top: $spacing-sm;
+  }
+}

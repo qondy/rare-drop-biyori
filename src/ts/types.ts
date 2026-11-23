@@ -60,6 +60,13 @@ export interface RareEvent {
 }
 
 /** 設定（Firestore: users/{uid}/meta/settings） */
+/** 合わなかったので「もうやらない」と決めたときのメモ */
+export interface NopeNote {
+  reason: string;
+  date: string; // 決めた日 YYYY-MM-DD
+}
+
 export interface Settings {
-  hidden: string[]; // 出さないことにしたプリセットのお題ID
+  hidden: string[]; // もうやらない（ドロップに出さない）お題ID
+  nope: Record<string, NopeNote>; // お題ID → 合わなかった理由（理由なしで出さないにした古いお題は入っていない）
 }

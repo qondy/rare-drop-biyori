@@ -123,7 +123,7 @@
         </label>
         <div id="zukan-list" class="zukan-list"></div>
         <details class="fold" id="hidden-fold">
-          <summary class="fold__summary">出さないことにしたお題<span class="fold__count" id="hidden-count"></span></summary>
+          <summary class="fold__summary">もうやらないお題<span class="fold__count" id="hidden-count"></span></summary>
           <div id="hidden-list" class="zukan-list zukan-list--hidden"></div>
         </details>
       </section>
@@ -177,6 +177,14 @@
         </div>
 
         <div class="section">
+          <div class="section__head">
+            <h3 class="section__title">もうやらないこと <span class="section__count" id="rec-nope-count"></span></h3>
+            <p class="section__desc">やってみて合わなかったことも、自分を知る手がかり。ドロップには出なくなります</p>
+          </div>
+          <div id="rec-nope" class="nope-list"></div>
+        </div>
+
+        <div class="section">
           <div class="section__head section__head--row section__head--timeline">
             <h3 class="section__title">これまでの行動 <span class="section__count" id="rec-count"></span></h3>
             <div class="order-toggle" role="radiogroup" aria-label="並び順">
@@ -220,6 +228,10 @@
         <label class="field__label" for="input-log-note">ひとこと<span class="field__hint">任意・+5XP</span></label>
         <textarea id="input-log-note" maxlength="500" placeholder="例：知らない定食屋の日替わりが大当たり。また行く"></textarea>
       </div>
+      <label class="toggle toggle--nope hidden" id="log-nope-row">
+        <input type="checkbox" id="input-log-nope" />
+        <span>自分には合わなかった。このお題はもうやらない</span>
+      </label>
       <div class="modal__actions">
         <button type="button" id="btn-log-delete" class="btn btn--ghost is-danger hidden modal__actions-left">削除</button>
         <button type="button" id="btn-log-cancel" class="btn btn--ghost">キャンセル</button>
@@ -266,6 +278,26 @@
       <div id="detail-logs" class="log-list log-list--compact"></div>
       <div class="modal__actions modal__actions--wrap" id="detail-actions"></div>
     </div>
+  </div>
+
+  <!-- もうやらない -->
+  <div id="nope-modal-overlay" class="dialog-overlay">
+    <form id="nope-form" class="modal" novalidate>
+      <div class="modal__head">
+        <div class="modal__title" id="nope-modal-title">もうやらないことにする</div>
+        <button type="button" id="btn-nope-close" class="modal__close" aria-label="閉じる">&times;</button>
+      </div>
+      <div class="modal__quest" id="nope-quest"></div>
+      <div class="field">
+        <label class="field__label" for="input-nope-reason">合わなかった理由<span class="field__hint">任意</span></label>
+        <textarea id="input-nope-reason" maxlength="200" placeholder="例：人が多い場所は疲れるだけだった。静かな寄り道のほうが好き"></textarea>
+      </div>
+      <p class="modal__note">このお題はドロップに出なくなります。気が変わったら「記録」タブからいつでも戻せます。</p>
+      <div class="modal__actions">
+        <button type="button" id="btn-nope-cancel" class="btn btn--ghost">キャンセル</button>
+        <button type="submit" id="btn-nope-submit" class="btn btn--primary">もうやらない</button>
+      </div>
+    </form>
   </div>
 
   <!-- レアイベントの予定 -->
